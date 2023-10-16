@@ -47,6 +47,27 @@ func main(){
 		})
 	})
 
+	//Path params:
+	router.GET("/productos/:id", func(ctx *gin.Context){
+			producto, ok := findProductsById(products,ctx.Param("id"))
+		if ok=="found"{
+			ctx.String(200, "Nombre: %v; id %v", producto.Name, ctx.Param("id"))
+		} else {
+			ctx.String(400, "Producto no encontrado.")
+		}
+	})
+   
+	//Query params:
+	router.GET("/productos", func(ctx *gin.Context) {
+		producto, ok :=findProductsByName(products, ctx.Query("nombre"))
+			if ok=="found"{
+			ctx.String(200, "Nombre: %v; precio: %v", producto.Name, producto.Price)
+		} else {
+			ctx.String(400, "Producto no encontrado.")
+		}
+	})
+
+
 	//Grupo de endpoints:
 	gopher := router.Group("/perfil")
 	{
@@ -66,3 +87,38 @@ func main(){
 	router.Run()
 
 }
+
+
+
+func findProductsById(products []prod.Product, id string) (prod.Product, string){
+	p:= prod.Product {
+	}
+	ok := ""
+	for _, product := range products {
+		if fmt.Sprint(product.Id) == id {
+			p= product
+			break
+		}
+	}
+	if p.Id != 0 {
+		ok = "found"
+	}
+return p, ok
+}
+
+func findProductsByName(products []prod.Product, name string) (prod.Product, string){
+	p:= prod.Product {
+	}
+	ok := ""
+	for _, product := range products {
+		if fmt.Sprint(product.Name) == name {
+			p= product
+			break
+		}
+	}
+	if p.Name != "" {
+		ok = "found"
+	}
+return p, ok
+}
+
