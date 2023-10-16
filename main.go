@@ -47,8 +47,20 @@ func main(){
 		})
 	})
 
-
-	//
+	//Grupo de endpoints:
+	gopher := router.Group("/perfil")
+	{
+		gopher.GET("/foto", func(ctx *gin.Context){
+			ctx.JSON(200, gin.H{
+				"message":"foto here",
+			})
+		})
+		gopher.GET("/datos",func(ctx *gin.Context){
+			ctx.JSON(200, gin.H{
+				"message":"data here",
+			})
+		})
+	}
 
 	//run server
 	router.Run()
