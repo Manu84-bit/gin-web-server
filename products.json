@@ -1,0 +1,21 @@
+[
+        {  
+            "id":1,
+            "nombre":"Televisor",
+            "precio":400.00,
+            "stock":2,
+            "código":123,
+            "fecha_creación":"02/03/2023",
+            "publicado":true
+        },
+        {
+            "id": 2,
+            "nombre": "Lavadora",
+            "precio": 500.0,
+            "stock": 5,
+            "código": 423,
+            "fecha_creación": "04/04/2023",
+            "publicado": false
+        }
+]
+
