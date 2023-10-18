@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"strconv"
 
 	prod "github.com/Manu84-bit/gin-web-server/product"
 	"github.com/gin-gonic/gin"
@@ -67,6 +69,72 @@ func main(){
 		}
 	})
 
+	//Query params to create product:
+	router.GET("/productparams", func(ctx *gin.Context) {
+		newId, err1 := strconv.Atoi(ctx.Query("id"))
+		newName:= ctx.Query("nombre")
+		newPrice, err3 := strconv.ParseFloat(ctx.Query("precio"), 64)
+		newStock, err4 := strconv.Atoi(ctx.Query("stock"))
+		newCode:= ctx.Query("código")
+		newDate:= ctx.Query("vencimiento")
+		newPublished, er7 := strconv.ParseBool(ctx.Query("publicado"))
+		errors := []error{err1,err3, err4, er7}
+		for _, e := range errors{
+			if e!=nil{
+				ctx.String(400, "Error: wrong data product.")
+			}
+			break
+		}
+
+		newProduct:= prod.Product{Id: newId, Name: newName, Price: newPrice, Stock: newStock, Code: newCode, Expiration: newDate, Published: newPublished}
+		ctx.JSON(http.StatusOK, gin.H{
+			"newProduct": newProduct,
+		})
+		products = append(products, newProduct)
+		
+	})
+
+	//Query params to search by quantity:
+router.GET("/searchbyquantity", func(ctx *gin.Context) {
+		min, err1 := strconv.Atoi(ctx.Query("min"))
+		max, err2 := strconv.Atoi(ctx.Query("max"))
+		if err1 != nil || err2 != nil{
+			ctx.String(400, "Error: wrong data")
+		} else {
+			searchedProducts, ok := findProductsByQuantity(products, min, max)
+			if ok=="found"{
+			ctx.JSON(200, gin.H{
+				"foundProducts": searchedProducts,
+			})
+		} else {
+			ctx.String(400, "No existen productos en ese rango de cantidades.")
+		}
+		}
+})
+
+
+router.GET("/buy", func(ctx *gin.Context) {
+		name:=ctx.Query("name")
+		code:=ctx.Query("code")
+		units, err:= strconv.Atoi(ctx.Query("units"))
+		
+		if err != nil{
+			ctx.String(400, "Error: wrong data")
+		} else {
+			product, ok := findProductsByName(products, name)
+			if ok!="" && product.Name == name {
+					detail:= Detalle{
+							code, name, units, product.Price * float64(units),
+						}
+			
+			ctx.JSON(200, gin.H{
+				"detalleCompra": detail,
+			})
+		}else {
+			ctx.String(400, "La información del producto es incorrecta.")
+		}
+	}
+})
 
 	//Grupo de endpoints:
 	gopher := router.Group("/perfil")
@@ -122,3 +190,24 @@ func findProductsByName(products []prod.Product, name string) (prod.Product, str
 return p, ok
 }
 
+func findProductsByQuantity(products []prod.Product, min, max int) ([]prod.Product, string){
+	searchedProducts:= []prod.Product {
+	}
+	ok := ""
+	for _, product := range products {
+		if product.Stock >= min && product.Stock <= max {
+			searchedProducts = append(searchedProducts, product)
+		}
+	}
+	if len(searchedProducts) > 0 {
+		ok = "found"
+	}
+return searchedProducts, ok
+}
+
+type Detalle struct {
+	Code string
+	Name string
+	Units int
+	Total float64
+}
