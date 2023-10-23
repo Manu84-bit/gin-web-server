@@ -6,7 +6,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
 	prod "github.com/Manu84-bit/gin-web-server/product"
 	"github.com/gin-gonic/gin"
@@ -151,6 +154,46 @@ router.GET("/buy", func(ctx *gin.Context) {
 		})
 	}
 
+	router.POST("/productos/crear", func(ctx *gin.Context){
+		var product prod.Product
+		product.Id = len(products) + 1
+		err = ctx.BindJSON(&product)
+		if product.Name == "" || product.Code == "" || product.Expiration == "" || product.Price <= 0{
+			ctx.String(http.StatusBadRequest, "error: bad request. Some values are invalid:", err)
+			return
+		}
+
+		for _, p := range products {
+			if p.Code == product.Code {
+				ctx.String(http.StatusBadRequest, "error: bad request. Code must be unique")
+			return
+			}
+		}
+
+		if !checkDateFormat(product.Expiration)  {
+			ctx.String(http.StatusBadRequest, "error: bad request. Expiration date must be of format DD/MM/YYYY")
+			return
+		}
+
+		message, isValid := checkExpirationDate(product.Expiration)
+		if !isValid {
+			ctx.String(http.StatusBadRequest, message)
+			return
+		} 
+			
+
+		if err!= nil {
+			ctx.String(http.StatusBadRequest, "error %v", err)
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"new_product": product,
+		})
+
+	 products = append(products, product)
+
+	})
+
 	//run server
 	router.Run()
 
@@ -204,6 +247,28 @@ func findProductsByQuantity(products []prod.Product, min, max int) ([]prod.Produ
 	}
 return searchedProducts, ok
 }
+
+func checkDateFormat(s string) bool {
+    return regexp.MustCompile(`([0-9])([0-9])\/([0-9])([0-9])\/([0-9])([0-9])([0-9])([0-9])`).MatchString(s)
+}
+
+func checkExpirationDate(s string) (string, bool){
+	message :=""
+	elements := strings.Split(s,"/")
+	day, _ := strconv.Atoi(elements[0])
+	month, _ := strconv.Atoi(elements[1])
+	year, _ := strconv.Atoi(elements[2])
+	_, err := time.Parse("31/12/2023", s)
+	date:= time.Date(year, time.Month(month), day, 0,0,0,0, time.Local) 
+
+	if time.Now().After(date) || err == nil {
+		message = fmt.Sprint("Invalid expiration date.",err)
+		return message, false
+	}else {
+		return message, true
+	}
+	
+	}
 
 type Detalle struct {
 	Code string

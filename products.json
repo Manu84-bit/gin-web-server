@@ -4,7 +4,7 @@
             "nombre":"Televisor",
             "precio":400.00,
             "stock":2,
-            "código":"12sdfs3",
+            "código":"1T020323",
             "vencimiento":"02/03/2023",
             "publicado":true
         },
@@ -13,7 +13,7 @@
             "nombre": "Lavadora",
             "precio": 500.0,
             "stock": 5,
-            "código": "423sd",
+            "código": "2L04042023",
             "vencimiento": "04/04/2023",
             "publicado": false
         },
@@ -22,7 +22,7 @@
             "nombre": "Secadora",
             "precio": 500.0,
             "stock": 10,
-            "código": "423sd",
+            "código": "3S04042023",
             "vencimiento": "04/04/2023",
             "publicado": false
           },
@@ -31,7 +31,7 @@
               "nombre": "Taladro",
               "precio": 40.0,
               "stock": 20,
-              "código": "423sd",
+              "código": "4T04042023",
               "vencimiento": "04/04/2023",
               "publicado": false
             }
